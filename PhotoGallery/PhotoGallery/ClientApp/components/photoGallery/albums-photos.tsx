@@ -8,29 +8,53 @@ import { NotificationService } from '../../core/services/notification.service';
 import { Paginated } from '../../core/common/paginated';
 import { OperationResult } from '../../core/domain/operationResult';
 
-interface AlbumPhotoState {
-    currentCount: number;
-}
-
-export class AlbumPhotosComponent extends React.Component<RouteComponentProps<any>, AlbumPhotoState> {
+export class AlbumPhotosComponent extends React.Component<RouteComponentProps<any>, any> {
     private _albumsAPI: string = 'api/albums/';
     private _photosAPI: string = 'api/photos/';
     private _albumId: string;
-    private _photos: Array<Photo>;
+    private _albumPhotos: Array<Photo>;
     private _displayingTotal: number;
     private _albumTitle: string;
-    private _page: number;
+    private _page: number = 1;
     private _pagesCount: number;
     private _totalCount: number;
 
-    constructor(public dataService: DataService,
-        public utilityService: UtilityService,
-        public notificationService: NotificationService) {
+    public dataService: DataService;
+    public utilityService: UtilityService;
+    public notificationService: NotificationService;
+
+    constructor() {
         super();
         //this.state = { _page: 0, _pagesCount: 0, _totalCount: 0, range };
+        this.dataService = new DataService();       
     }
 
+    componentDidMount() {
+        this.getAlbumPhotos();
+    } 
+
     public render() {
+        const albumPhotos = this._albumPhotos.map((image: Photo) => (
+            <div className="thumbnail blue-thumb">
+                <NavLink to={image.Uri} className="fancybox center-block" title={image.Title}>
+                    <img className="media-object center-block" height="120" src={image.Uri} alt="" />
+                </NavLink>
+                <div className="row caption img-caption">
+                    <div className="row remove-caption">
+                        <div className="col-xs-10 dateCaption">{this.convertDateTime(image.DateUploaded)}</div>
+                        <div className="col-xs-2 buttonCaption">
+                            <button className="btn btn-xs btn-danger" onClick={() => { this.delete(image) }}>
+                                <span className="fa-stack fa-1x">
+                                    <i className="fa fa-remove fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                    <strong>{image.Title}</strong>
+                </div>
+            </div>
+        ));
+
         return <div className="container">
             <div className="row">
                 <div className="col-lg-12">
@@ -58,27 +82,7 @@ export class AlbumPhotosComponent extends React.Component<RouteComponentProps<an
             <div className="row text-center">
                 <div className="col-md-3 col-sm-6 hero-feature">
                     {
-                        this._photos.map((image) => {
-
-                            <div className="thumbnail blue-thumb">
-                                <NavLink to={image.Uri} className="fancybox center-block" title={image.Title}>
-                                    <img className="media-object center-block" height="120" src={image.Uri} alt="" />
-                                </NavLink>
-                                <div className="row caption img-caption">
-                                    <div className="row remove-caption">
-                                        <div className="col-xs-10 dateCaption">{this.convertDateTime(image.DateUploaded)}</div>
-                                        <div className="col-xs-2 buttonCaption">
-                                            <button className="btn btn-xs btn-danger" onClick={() => { this.delete(image) }}>
-                                                <span className="fa-stack fa-1x">
-                                                    <i className="fa fa-remove fa-stack-1x fa-inverse"></i>
-                                                </span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <strong>{image.Title}</strong>
-                                </div>
-                            </div>
-                        })
+                        albumPhotos
                     }
                 </div>
             </div>
@@ -91,12 +95,12 @@ export class AlbumPhotosComponent extends React.Component<RouteComponentProps<an
 
                 var data: any = res.json();
 
-                this._photos = data.Items;
-                this._displayingTotal = this._photos.length;
+                this._albumPhotos = data.Items;
+                this._displayingTotal = this._albumPhotos.length;
                 this._page = data.Page;
                 this._pagesCount = data.TotalPages;
                 this._totalCount = data.TotalCount;
-                this._albumTitle = this._photos[0].AlbumTitle;
+                this._albumTitle = this._albumPhotos[0].AlbumTitle;
             }).catch(error => {
 
                 if (error.status == 401 || error.status == 302) {

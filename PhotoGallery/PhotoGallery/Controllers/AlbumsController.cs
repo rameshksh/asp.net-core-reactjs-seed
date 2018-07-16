@@ -29,7 +29,7 @@ namespace PhotoGallery.Controllers
             _loggingRepository = loggingRepository;
         }
 
-        [Authorize(Policy = "AdminOnly")]
+        //[Authorize(Policy = "AdminOnly")]
         [HttpGet("{page:int=0}/{pageSize=12}")]
         public async Task<IActionResult> Get(int? page, int? pageSize)
         {
@@ -37,9 +37,9 @@ namespace PhotoGallery.Controllers
 
             try
             {
-                var result = await _authorizationService.AuthorizeAsync(User, "AdminOnly");
+                //var result = await _authorizationService.AuthorizeAsync(User, "AdminOnly");
 
-                if (result.Succeeded)
+               // if (result.Succeeded)
                 {
                     int currentPage = page.Value;
                     int currentPageSize = pageSize.Value;
@@ -66,12 +66,12 @@ namespace PhotoGallery.Controllers
                         TotalPages = (int)Math.Ceiling((decimal)_totalAlbums / currentPageSize),
                         Items = _albumsVM
                     };
-                }
-                else
-                {
-                    CodeResultStatus _codeResult = new CodeResultStatus(401);
-                    return new ObjectResult(_codeResult);
-                }
+               }
+               // else
+               // {
+                //    CodeResultStatus _codeResult = new CodeResultStatus(401);
+                //    return new ObjectResult(_codeResult);
+               // }
             }
             catch (Exception ex)
             {
@@ -83,7 +83,7 @@ namespace PhotoGallery.Controllers
         }
 
 
-        [Authorize(Policy = "AdminOnly")]
+       // [Authorize(Policy = "AdminOnly")]
         [HttpGet("{id:int}/photos/{page:int=0}/{pageSize=12}")]
         public PaginationSet<PhotoViewModel> Get(int id, int? page, int? pageSize)
         {

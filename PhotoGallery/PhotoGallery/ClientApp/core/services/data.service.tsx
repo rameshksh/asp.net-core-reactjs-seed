@@ -16,7 +16,7 @@ export class DataService {
         this._baseUri = baseUri;
     }
 
-    get(page: number) {
+    get(page: number = 1) {
         var uri = this._baseUri + page.toString() + '/' + this._pageSize.toString();
 
 
